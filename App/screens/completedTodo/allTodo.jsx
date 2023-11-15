@@ -24,6 +24,7 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: 'black',
     paddingVertical: 2,
+    marginVertical: 5,
   },
   btnContainer: {
     flexDirection: 'row',
