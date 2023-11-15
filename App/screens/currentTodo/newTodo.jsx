@@ -1,14 +1,17 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect} from 'react';
 import {FlatList, SafeAreaView, StyleSheet, Text} from 'react-native';
-import {CurrentTodo} from './currentTodo';
-import {useStore} from '../../stores/store';
 import {handleDate} from '../../utils/index';
+import {useStore} from '../../stores/store';
+import {CurrentTodo} from './currentTodo';
+
 export const NewTodo = () => {
   const {tasks, handleCurrentTasks, currentTask} = useStore();
+
   useEffect(() => {
     const data = tasks.filter(item => item.date === handleDate());
     handleCurrentTasks(data);
   }, [tasks]);
+
   return (
     <SafeAreaView style={styles.container}>
       {!currentTask.length ? (
@@ -23,6 +26,7 @@ export const NewTodo = () => {
     </SafeAreaView>
   );
 };
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -38,8 +42,7 @@ const styles = StyleSheet.create({
   noTasksText: {
     textAlign: 'center',
     fontSize: 20,
-    fontWeight: 'bold',
-    color: 'red', // Set your desired text color
+    color: 'red',
   },
   title: {
     fontSize: 32,

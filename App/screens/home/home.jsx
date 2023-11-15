@@ -8,13 +8,15 @@ import {
   Image,
   Modal,
   Text,
+  Alert,
 } from 'react-native';
 import {useStore} from '../../stores/store';
 import {useNavigation} from '@react-navigation/native';
-import notifee, {EventType} from '@notifee/react-native';
+import notifee from '@notifee/react-native';
 import {launchImageLibrary} from 'react-native-image-picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import {handleDate, handleTime, convertTimeFormat} from '../../utils/index';
+
 const initialState = {
   title: '',
   description: '',
@@ -24,12 +26,12 @@ const initialState = {
 };
 
 export const Home = ({route}) => {
+  const {addTasks, tasks, deleteTasks, isEdit, updateIsEdit} = useStore();
   const [formData, setFormData] = React.useState(initialState);
   const [selectedImage, setSelectedImage] = useState(null);
   const [dateTime, setDateTime] = useState(new Date());
   const [showPicker, setShowPicker] = useState(false);
   const [mode, setMode] = useState('date');
-  const {addTasks, tasks, deleteTasks, isEdit, updateIsEdit} = useStore();
   const navigation = useNavigation();
   const {item} = route.params || {};
 
@@ -39,36 +41,20 @@ export const Home = ({route}) => {
       setSelectedImage(item.image);
     }
   }, [item]);
-  console.log('handleTimehandleTime', handleTime());
+
   useEffect(() => {
     const runNotificationCheck = () => {
-      // const filteredTasks = tasks.filter(item => item.date === handleDate());
-      const filteredTasks = tasks.forEach(element => {
-        console.log(element.time, 'time34343', handleTime());
+      tasks.forEach(element => {
         const time = convertTimeFormat(element.time);
         const currentTime = convertTimeFormat(handleTime());
-        console.log(
-          time == currentTime,
-          'hhhhhggghddd777dddddddhh',
-          time,
-          currentTime,
-        );
-        // console.log(element.time, 'time333dd555', handleTime());
-        // console.log(element.time == handleTime(), 'Timesseeedddddff');
-        // console.log(element.date == handleDate(), 'Dateee');
-        // console.log(
-        //   element.date == handleDate() && element.time == handleTime(),
-        //   'sdfdsfkkkkk',
-        // );
         if (element.date == handleDate() && time == currentTime) {
           showNotification(element);
         }
       });
     };
-    const intervalId = setInterval(runNotificationCheck, 40000); // Run every minute
-
+    const intervalId = setInterval(runNotificationCheck, 40000);
     return () => clearInterval(intervalId);
-  }, []); // This will only run once when t
+  }, []);
 
   const onChange = (event, selectedDateTime) => {
     const date = selectedDateTime.toDateString();
@@ -100,6 +86,14 @@ export const Home = ({route}) => {
       !formData.date ||
       !formData.time
     ) {
+      Alert.alert('', 'Please Fill All Data', [
+        {
+          text: 'Cancel',
+          onPress: () => console.log('Cancel Pressed'),
+          style: 'cancel',
+        },
+        {text: 'OK', onPress: () => console.log('OK Pressed')},
+      ]);
       return;
     }
     const taskId = Math.random().toString(36).substring(2);
@@ -133,13 +127,13 @@ export const Home = ({route}) => {
       }
       return task;
     });
-    console.log('updatedTasks', updatedTasks);
     deleteTasks(updatedTasks);
     setFormData(initialState);
     setSelectedImage(null);
     navigation.navigate('Current Task');
     updateIsEdit(true);
   };
+
   const handleImagePicker = () => {
     const options = {
       mediaType: 'photo',
@@ -164,6 +158,7 @@ export const Home = ({route}) => {
       }
     });
   };
+
   const showNotification = async item => {
     try {
       const channelId = await notifee.createChannel({
@@ -173,34 +168,24 @@ export const Home = ({route}) => {
       });
 
       await notifee.displayNotification({
-        title: `${item.title}`, // Plain text title
-        subtitle: 'This is today task', // Plain text subtitle
-        body: `${item.description}`, // Plain text body
+        title: `${item.title}`,
+        subtitle: 'This is today task',
+        body: `${item.description}`,
         android: {
           channelId,
           color: '#4caf50',
-          actions: [
-            {
-              title: 'Dance 🕺', // Plain text with emoji
-              pressAction: {id: 'dance'},
-            },
-            {
-              title: 'Cry 😢', // Plain text with emoji
-              pressAction: {id: 'cry'},
-            },
-          ],
         },
       });
     } catch (error) {
       console.error('Notification Error:', error);
     }
   };
-  console.log('k4hhddsddddddk', tasks);
+
   return (
     <>
       <View style={styles.container}>
         <TextInput
-          style={styles.input}
+          style={styles.inputTitle}
           placeholder="Title"
           onChangeText={text => setFormData({...formData, title: text})}
           value={formData.title}
@@ -229,8 +214,8 @@ export const Home = ({route}) => {
         {selectedImage && (
           <View style={{flex: 1, width: '100%', justifyContent: 'center'}}>
             <Image
-              resizeMode={'cover'}
-              style={{width: '100%', height: 350}}
+              resizeMode={'contain'}
+              style={{width: '100%', height: 200, backgroundColor: 'black'}}
               source={{uri: selectedImage}}
             />
           </View>
@@ -258,7 +243,13 @@ export const Home = ({route}) => {
             </View>
           </View>
         </Modal>
-        <Text>{`Selected Date & Time: ${dateTime.toLocaleString()}`}</Text>
+        {formData.date && (
+          <Text
+            style={{
+              textAlign: 'center',
+              paddingVertical: 10,
+            }}>{`${dateTime.toLocaleString()}`}</Text>
+        )}
       </View>
     </>
   );
@@ -271,6 +262,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   input: {
+    height: 80,
+    width: '100%',
+    marginVertical: 10,
+    paddingHorizontal: 10,
+    borderColor: 'gray',
+    borderWidth: 1,
+    borderRadius: 5,
+  },
+  inputTitle: {
     height: 40,
     width: '100%',
     marginVertical: 10,
@@ -283,7 +283,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   btnContainer: {
     justifyContent: 'space-between',

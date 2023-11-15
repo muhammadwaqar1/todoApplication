@@ -1,9 +1,9 @@
 import * as React from "react";
-import { NavigationContainer } from "@react-navigation/native";
+import { NavigationContainer, DefaultTheme } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Home } from "./App/screens/home/home";
-import { NewTodo } from "./App/screens/newTodo/newTodo";
-import { ViewTodo } from "./App/screens/viewTodo/viewTodo";
+import { NewTodo } from "./App/screens/currentTodo/newTodo";
+import { ViewTodo } from "./App/screens/completedTodo/viewTodo";
 import ViewIcon from "./App/assets/icons/home.png";
 import HomeDark from "./App/assets/icons/homeDark.png";
 import Eye from "./App/assets/icons/view.png";
